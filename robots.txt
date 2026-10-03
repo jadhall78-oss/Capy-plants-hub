@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://jadhall78-oss.github.io/Capy-plants-hub/sitemap.xml
