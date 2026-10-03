@@ -73,6 +73,7 @@ footer{border-top:1px solid var(--line);padding:25px 20px;color:var(--muted);fon
     <div class="logo">Capy<span>Plants</span> Hub</div>
     <a href="#calculator">Calculator</a>
     <a href="#values">Values</a>
+    <a href="#mutations">Mutations</a>
     <a href="#about">About</a>
     <button class="btn btn-primary" id="signIn">Sign In</button>
   </nav>
@@ -83,7 +84,7 @@ footer{border-top:1px solid var(--line);padding:25px 20px;color:var(--muted);fon
     <div class="hero-card">
       <div class="kicker">Fan-made trading hub</div>
       <h1>Check your trade before you accept.</h1>
-      <p>Compare items, see estimated values, and use the trade calculator. This starter site uses example values for now — we can replace them with the real game data next.</p>
+      <p>Compare items, see estimated values, and use the trade calculator. Values are measured in Golden Carrots, with Radiant and Ascended mutation multipliers.</p>
       <a class="btn btn-primary" href="#calculator">Open Calculator</a>
     </div>
     <div class="hero-side">
@@ -125,19 +126,28 @@ footer{border-top:1px solid var(--line);padding:25px 20px;color:var(--muted);fon
 
   <section id="values">
     <div class="section-title">
-      <div><h2>Item Values</h2><p>Starter placeholder data — ready to replace with the real list.</p></div>
+      <div><h2>Item Values</h2><p>Current Capybara values • Golden Carrots</p></div>
     </div>
     <div class="item-grid" id="itemGrid"></div>
   </section>
 
   <div class="ad">ADVERTISEMENT — ad space placeholder</div>
 
-  <section id="about">
-    <div class="section-title"><div><h2>What's next?</h2><p>We can turn this into the full site you described.</p></div></div>
+  <section id="mutations">
+    <div class="section-title"><div><h2>✨ Mutations</h2><p>Mutations multiply the base Golden Carrot value.</p></div></div>
     <div class="item-grid">
-      <div class="item"><h3>📊 Live values</h3><small>Real item database, demand and value changes.</small></div>
-      <div class="item"><h3>🔎 Search</h3><small>Find an item instantly and view its details.</small></div>
-      <div class="item"><h3>👤 Accounts</h3><small>Save favourite items and trades after we add a real backend.</small></div>
+      <div class="item"><h3>Normal</h3><div class="value">1×</div><small>Base value</small></div>
+      <div class="item"><h3>Radiant</h3><div class="value">1.75×</div><small>Base value × 1.75</small></div>
+      <div class="item"><h3>Ascended</h3><div class="value">3.5×</div><small>Base value × 3.5</small></div>
+    </div>
+  </section>
+
+  <section id="about">
+    <div class="section-title"><div><h2>About</h2><p>CapyPlants Hub is a fan-made trading-value project.</p></div></div>
+    <div class="item-grid">
+      <div class="item"><h3>🥕 Currency</h3><small>The currency used for all values is <strong>Golden Carrots</strong>.</small></div>
+      <div class="item"><h3>📊 Values</h3><small>Values can be updated as the game market changes.</small></div>
+      <div class="item"><h3>🔎 Search</h3><small>Find an item instantly and view its rarity and value.</small></div>
     </div>
   </section>
 </main>
@@ -146,13 +156,23 @@ footer{border-top:1px solid var(--line);padding:25px 20px;color:var(--muted);fon
 
 <script>
 const items = [
-  {name:"Starter Plant", value:10, rarity:"Common"},
-  {name:"Golden Carrot", value:35, rarity:"Rare"},
-  {name:"Crystal Capy", value:80, rarity:"Epic"},
-  {name:"Sunflower King", value:150, rarity:"Legendary"},
-  {name:"Mega Capybara", value:300, rarity:"Mythic"},
-  {name:"Rainbow Garden", value:500, rarity:"Mythic"}
+  {name:"Umbral Raccoon Capybara", value:25000, rarity:"Eternal"},
+  {name:"Glacial Mammoth Capybara", value:15000, rarity:"Eternal"},
+  {name:"Hyrax", value:13500, rarity:"Eternal"},
+  {name:"Amber T-Rex Capybara", value:12000, rarity:"Eternal"},
+  {name:"Ancient T-Rex", value:12000, rarity:"Eternal"},
+  {name:"Raccoon Capybara", value:3300, rarity:"Secret"},
+  {name:"Kraken Capybara", value:2900, rarity:"Secret"},
+  {name:"Void Maw Capybara", value:2500, rarity:"Secret"},
+  {name:"Impostor Capybara", value:1450, rarity:"Secret"},
+  {name:"Mammoth Capybara", value:1200, rarity:"Secret"},
+  {name:"Capybara Sun God", value:1000, rarity:"Secret"},
+  {name:"T-Rex Capybara", value:800, rarity:"Secret"},
+  {name:"Jester Capybara", value:550, rarity:"Godly"},
+  {name:"Moon Mage Capybara", value:40, rarity:"Eternal"}
 ];
+
+const mutations = {Normal:1, Radiant:1.75, Ascended:3.5};
 
 const money = n => n.toLocaleString("en-AU");
 const optionHTML = () => '<option value="">Select an item…</option>' +
@@ -161,15 +181,17 @@ const optionHTML = () => '<option value="">Select an item…</option>' +
 function addRow(side){
   const row=document.createElement("div");
   row.className="item-row";
-  row.innerHTML=`<select aria-label="${side} item">${optionHTML()}</select><button type="button" class="remove" aria-label="Remove item">×</button>`;
-  row.querySelector("select").addEventListener("change", update);
+  row.innerHTML=`<select aria-label="${side} item">${optionHTML()}</select><select aria-label="Mutation"><option value="Normal">Normal</option><option value="Radiant">Radiant (1.75×)</option><option value="Ascended">Ascended (3.5×)</option></select><button type="button" class="remove" aria-label="Remove item">×</button>`;
+  row.querySelectorAll("select").forEach(select=>select.addEventListener("change", update));
   row.querySelector(".remove").addEventListener("click",()=>{row.remove();update();});
   document.getElementById(side==="left"?"leftItems":"rightItems").appendChild(row);
 }
 function total(side){
-  return [...document.querySelectorAll(`#${side}Items select`)].reduce((sum,s)=>{
-    const i=Number(s.value);
-    return sum+(Number.isInteger(i)&&items[i]?items[i].value:0);
+  return [...document.querySelectorAll(`#${side}Items .item-row`)].reduce((sum,row)=>{
+    const selects=row.querySelectorAll("select");
+    const i=Number(selects[0].value);
+    const mutation=selects[1]?.value || "Normal";
+    return sum+(Number.isInteger(i)&&items[i]?items[i].value*mutations[mutation]:0);
   },0);
 }
 function update(){
@@ -193,7 +215,7 @@ document.getElementById("itemGrid").innerHTML=items.map(x=>`
   <article class="item">
     <div class="item-top"><h3>${x.name}</h3><span class="badge">${x.rarity}</span></div>
     <div class="value">${money(x.value)}</div>
-    <small>Example value</small>
+    <small>Golden Carrots • Base value</small>
   </article>`).join("");
 
 addRow("left"); addRow("right"); update();
